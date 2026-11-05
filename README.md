@@ -34,3 +34,45 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+# THE DIARY — Wear Your Story
+
+The Diary is a fashion marketplace for Johannesburg's local brands.
+Brands post their drops and specials. Customers shop, try on at home
+with Try & Decide delivery, and only pay for what they keep.
+
+Built with Next.js, TypeScript & Tailwind CSS.
+
+---
+
+## 1. What you need before you start
+
+- **Node.js v22** (not v18 from apt)
+- **npm** (comes with Node)
+- **Git**
+
+Check you have it:
+```bash
+node -v
+# should say v22.xxx
+npm -v
+
+- How to run it
+cd fashion-marketplace
+npm install
+npm run dev
+
+## then open browser
+
+http://localhost:3000
+
+## how to run for production
+
+npm run build
+npm start
+
+## how to kill server
+
+# Kill anything on port 3000
+lsof -ti:3000 | xargs kill -9
+npm run dev
