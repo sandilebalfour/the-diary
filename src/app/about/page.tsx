@@ -1,0 +1,3 @@
+export default function About() {
+  return <main className="min-h-screen bg-[#F6F5F2] p-8 max-w-2xl mx-auto text-center"><h1 className="text-4xl font-black">Our Story</h1><p className="mt-4 text-[#5A5A55] leading-relaxed">THE DIARY is a diary of Joburg style. From Amapiano to Amapantsula, Amabhinca to Amabujwa - we bring local brands together so you can wear your story.</p><a href="/brands" className="inline-block mt-6 bg-black text-white px-6 py-3 rounded-full font-bold">Meet the Brands</a></main>
+}
