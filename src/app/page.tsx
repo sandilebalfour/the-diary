@@ -5,11 +5,11 @@ export default function Home() {
       <header className="flex justify-between items-center px-4 sm:px-6 lg:px-12 py-4 border-b border-[#E5E2DB] bg-[#F6F5F2] sticky top-0 z-10">
         <h1 className="text-xl sm:text-2xl font-black tracking-tighter">THE DIARY</h1>
         <nav className="hidden md:flex gap-6 text-sm font-medium text-[#5A5A55]">
-          <a href="#" className="hover:text-black">Shop</a>
-          <a href="#" className="hover:text-black">Brands</a>
-          <a href="#" className="hover:text-black">Specials</a>
-          <a href="#" className="hover:text-black">About</a>
-        </nav>
+  <a href="/" className="hover:text-black">Home</a>
+  <a href="/brands" className="hover:text-black">Brands</a>
+  <a href="#" className="hover:text-black">Specials</a>
+  <a href="#" className="hover:text-black">About</a>
+</nav>
         <div className="flex items-center gap-2">
           <button className="md:hidden border border-[#D8D3C8] px-3 py-2 rounded-full text-sm">Menu</button>
           <button className="bg-[#1C1C1A] text-white px-4 py-2 rounded-full text-sm">Cart (0)</button>
@@ -29,7 +29,7 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 mt-6">
             <button className="bg-[#1C1C1A] text-white px-6 py-3 rounded-full font-semibold text-sm sm:text-base w-full sm:w-auto">Shop This Week's Drops</button>
-            <button className="border border-[#1C1C1A] px-6 py-3 rounded-full font-semibold text-sm sm:text-base w-full sm:w-auto">Browse Brands</button>
+            <a href="/brands" className="border border-[#1C1C1A] px-6 py-3 rounded-full font-semibold text-sm sm:text-base w-full sm:w-auto text-center">Browse Brands</a>
           </div>
         </div>
         <div className="order-1 lg:order-2 bg-[#E8E2D6] w-full h-[280px] sm:h-[360px] lg:h-[420px] rounded-[24px] flex items-center justify-center text-center p-6">
