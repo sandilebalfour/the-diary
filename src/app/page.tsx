@@ -5,7 +5,6 @@ import { useState, useRef, useEffect } from "react";
 export default function Home() {
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
-  const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currentFrame, setCurrentFrame] = useState(0);
   const [selectedGender, setSelectedGender] = useState<string | null>(null);
@@ -16,6 +15,8 @@ export default function Home() {
   const [hoveredBrand, setHoveredBrand] = useState<string | null>(null);
   const [hoveredStory, setHoveredStory] = useState<string | null>(null);
   const [hoveredKasi, setHoveredKasi] = useState<string | null>(null);
+  const [showSignup, setShowSignup] = useState(false);
+  
 
   const searchInputRef = useRef<HTMLInputElement>(null);
   const framesRef = useRef<HTMLDivElement>(null);
@@ -62,7 +63,7 @@ export default function Home() {
 
   const toggleSearch = () => {
     if (searchOpen) { setSearch(""); setSearchOpen(false); }
-    else { setSearchOpen(true); setOpenMenu(null); setMobileMenuOpen(false); }
+    else { setSearchOpen(true); setMobileMenuOpen(false); }
   };
 
   const goToFrame = (index: number) => {
@@ -80,7 +81,6 @@ export default function Home() {
 
   const scrollToShop = () => {
     shopRef.current?.scrollIntoView({ behavior: "smooth" });
-    setOpenMenu(null);
     setMobileMenuOpen(false);
   };
 
@@ -100,7 +100,6 @@ export default function Home() {
   };
   const pickOnSale = () => {
     clearAll();
-    // Use a special filter via search hack - we filter by onSale in filteredProducts below using selectedGender === "OnSale"
     setSelectedGender("OnSale");
     setTimeout(() => document.getElementById("shop-results")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
   };
@@ -108,6 +107,16 @@ export default function Home() {
     clearAll();
     setSelectedGender("Exclusives");
     setTimeout(() => document.getElementById("shop-results")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+  };
+
+  const handleTrack = () => {
+    const code = trackCode.trim().toUpperCase() || "SOW-001";
+    if (code.startsWith("SOW")) setTrackResult({ status: "On Taxi • Soweto → CBD", detail: "Your parcel left Maponya Rank at 10:15. Driver: Taxi #SOW-12. Collect at Bree Rank.", step: 2 });
+    else if (code.startsWith("TEM")) setTrackResult({ status: "At Rank • Tembisa", detail: "Your parcel is at Phumulani Mall Rank waiting for next taxi to CBD.", step: 1 });
+    else if (code.startsWith("ALEX")) setTrackResult({ status: "Delivered • Alex", detail: "Collected at Pan Africa at 14:20. Thanks for shopping The Diary.", step: 3 });
+    else if (code.startsWith("PHELI") || code.startsWith("PHE")) setTrackResult({ status: "On Taxi • Pheli → CBD", detail: "Left Marabastad Rank at 11:00. ETA Bree Rank 12:30.", step: 2 });
+    else if (code.startsWith("SOS")) setTrackResult({ status: "Ordered • Sosha", detail: "Seller confirmed. Drop at Sosha Crossing on Friday 10am.", step: 0 });
+    else setTrackResult({ status: "Ordered", detail: "We found your order. Seller is packing it. Drop at rank on Thu/Fri.", step: 0 });
   };
 
   const filteredProducts = products.filter((p) => {
@@ -265,7 +274,7 @@ export default function Home() {
       <div ref={shopRef} className="bg-white border-t border-black px-4 sm:px-6 lg:px-12 py-8 sm:py-12 scroll-mt-[70px]">
         <div className="max-w-[1400px] mx-auto">
 
-          {/* SHOP 01 - GENDER - MEN NO LONGER BLACK */}
+          {/* SHOP 01 - GENDER */}
           <p className="text-[11px] tracking-[0.25em] text-[#8A857C]">SHOP • 01</p>
           <div className="flex justify-between items-end gap-4">
             <h2 className="text-4xl sm:text-6xl font-black tracking-tighter leading-[0.95] mt-2">Shop By<br/>Gender.</h2>
@@ -290,9 +299,8 @@ export default function Home() {
             </div>
           </button>
 
-          {/* MEN + KIDS - MEN NOW LIGHT, NOT BLACK */}
+          {/* MEN + KIDS - MEN NO BLACK */}
           <div className="flex gap-3 mt-3">
-            {/* MEN - LIGHT GREY / CREAM - NO BLACK */}
             <button onClick={() => pickGender("Men")} onMouseEnter={() => setHoveredGender("Men")} onMouseLeave={() => setHoveredGender(null)} className={`group flex-1 text-left rounded-[20px] overflow-hidden border-2 transition-all duration-300 ${selectedGender === "Men" ? "border-black shadow-xl" : "border-[#E5E2DB]"} ${hoveredGender === "Men" ? "-translate-y-1 shadow-xl border-black scale-[1.01]" : ""}`}>
               <div className={`h-[180px] sm:h-[210px] flex flex-col justify-between p-4 sm:p-5 transition-colors ${hoveredGender === "Men" ? "bg-[#D1CDC5]" : "bg-[#E8E2D6]"}`}>
                 <div className="flex justify-between items-start">
@@ -307,7 +315,6 @@ export default function Home() {
               </div>
             </button>
 
-            {/* KIDS */}
             <button onClick={() => pickGender("Kids")} onMouseEnter={() => setHoveredGender("Kids")} onMouseLeave={() => setHoveredGender(null)} className={`group flex-1 text-left rounded-[20px] overflow-hidden border-2 transition-all duration-300 ${selectedGender === "Kids" ? "border-black shadow-xl" : "border-[#E5E2DB]"} ${hoveredGender === "Kids" ? "-translate-y-1 shadow-xl border-black scale-[1.01]" : ""}`}>
               <div className={`h-[180px] sm:h-[210px] flex flex-col justify-between p-4 sm:p-5 transition-colors ${hoveredGender === "Kids" ? "bg-[#D8CFC0]" : "bg-[#F0EDE8]"}`}>
                 <div className="flex justify-between items-start">
@@ -365,8 +372,6 @@ export default function Home() {
               {selectedKasi && <button onClick={() => setSelectedKasi(null)} className="shrink-0 bg-black text-white px-4 py-2.5 rounded-full text-sm font-bold">Clear {selectedKasi} ✕</button>}
             </div>
             <p className="text-[#5A5A55] text-sm mt-1">Where you from? Tap your kasi. Hover to preview.</p>
-
-            {/* Kasi frames - scroll sideways on phone, grid on desktop */}
             <div className="flex gap-3 mt-5 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-5 sm:overflow-visible snap-x snap-mandatory" style={{ scrollbarWidth: "none" }}>
               {kasiList.map((k) => (
                 <button
@@ -396,9 +401,7 @@ export default function Home() {
             <p className="text-[11px] tracking-[0.25em] text-[#8A857C]">SHOP • 04</p>
             <h3 className="text-3xl sm:text-4xl font-black tracking-tighter mt-1">Deals & Drops.</h3>
             <p className="text-[#5A5A55] text-sm mt-1">Hover to preview • Tap to shop.</p>
-
             <div className="flex flex-col sm:flex-row gap-3 mt-5">
-              {/* ON-SALE */}
               <button onClick={pickOnSale} onMouseEnter={() => setHoveredGender("OnSale")} onMouseLeave={() => setHoveredGender(null)} className={`group flex-1 text-left rounded-[20px] overflow-hidden border-2 transition-all duration-300 ${selectedGender === "OnSale" ? "border-black shadow-xl" : "border-[#E5E2DB]"} ${hoveredGender === "OnSale" ? "-translate-y-1 shadow-xl border-black scale-[1.01]" : ""}`}>
                 <div className={`h-[170px] sm:h-[190px] flex flex-col justify-between p-5 transition-colors ${hoveredGender === "OnSale" ? "bg-[#B91C1C]" : "bg-[#FFF1F1]"}`}>
                   <div className="flex justify-between items-start">
@@ -412,8 +415,6 @@ export default function Home() {
                   </div>
                 </div>
               </button>
-
-              {/* EXCLUSIVES */}
               <button onClick={pickExclusives} onMouseEnter={() => setHoveredGender("Exclusives")} onMouseLeave={() => setHoveredGender(null)} className={`group flex-1 text-left rounded-[20px] overflow-hidden border-2 transition-all duration-300 ${selectedGender === "Exclusives" ? "border-black shadow-xl" : "border-[#E5E2DB]"} ${hoveredGender === "Exclusives" ? "-translate-y-1 shadow-xl border-black scale-[1.01]" : ""}`}>
                 <div className={`h-[170px] sm:h-[190px] flex flex-col justify-between p-5 transition-colors ${hoveredGender === "Exclusives" ? "bg-[#E8E2D6]" : "bg-white"}`}>
                   <div className="flex justify-between items-start">
@@ -466,8 +467,129 @@ export default function Home() {
         </div>
       </div>
 
-      <footer className="px-4 py-6 text-center text-sm text-[#8A857C] border-t bg-[#F6F5F2]">© 2026 THE DIARY — Johannesburg</footer>
+      {/* ===== FOOTER - PICKUP / DELIVERY / TRACK / SOCIALS / SIGNUP ===== */}
+<footer className="bg-[#1C1C1A] text-white px-4 sm:px-6 lg:px-12 pt-10 pb-6">
+  <div className="max-w-[1400px] mx-auto">
+    <div className="flex flex-col sm:flex-row justify-between gap-6 pb-8 border-b border-white/15">
+      <div>
+        <h2 className="text-3xl font-black tracking-tighter">THE DIARY</h2>
+        <p className="text-white/60 text-sm mt-1 max-w-sm">Wear Your Story. The best local brands. One diary. From Amapiano to Amapantsula, Amabhinca to Amabujwa.</p>
+        <p className="text-[11px] tracking-[0.2em] text-white/40 mt-3">JOHANNESBURG • SOWETO • TEMBISA • ALEX • PHELI • SOSHA</p>
+      </div>
+      <div className="sm:text-right shrink-0">
+        <p className="font-bold">Got a brand?</p>
+        <p className="text-white/60 text-sm">sell on the diary.</p>
+        <button onClick={() => setShowSignup(true)} className="mt-3 bg-white text-black px-6 py-3.5 rounded-full font-bold text-sm min-h-[48px] hover:scale-[1.03] transition">Signup Brand →</button>
+      </div>
+    </div>
 
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 py-8">
+      <div>
+        <h3 className="font-black text-sm tracking-[0.15em]">📍 PICKUP</h3>
+        <p className="text-white/60 text-xs mt-1">Collect at rank. Cheapest.</p>
+        <ul className="mt-3 space-y-2 text-sm">
+          <li><span className="font-bold">Soweto</span><br/><span className="text-white/60 text-xs">Maponya Mall Rank • Thu 10am-4pm</span></li>
+          <li><span className="font-bold">Tembisa</span><br/><span className="text-white/60 text-xs">Phumulani Mall • Thu 10am-4pm</span></li>
+          <li><span className="font-bold">Alex</span><br/><span className="text-white/60 text-xs">Pan Africa • Fri 10am-4pm</span></li>
+          <li><span className="font-bold">Pheli</span><br/><span className="text-white/60 text-xs">Marabastad Rank • Fri 10am-4pm</span></li>
+          <li><span className="font-bold">Sosha</span><br/><span className="text-white/60 text-xs">Sosha Crossing • Fri 10am-4pm</span></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 className="font-black text-sm tracking-[0.15em]">🚕 DELIVERY</h3>
+        <p className="text-white/60 text-xs mt-1">Via taxi. No fuel cost for you.</p>
+        <ul className="mt-3 space-y-2 text-sm">
+          <li className="flex justify-between gap-2"><span>Rank Pickup</span><span className="font-bold">R60</span></li>
+          <li className="flex justify-between gap-2"><span>Same Kasi</span><span className="font-bold">R80</span></li>
+          <li className="flex justify-between gap-2"><span>Kasi to Kasi</span><span className="font-bold">R100</span></li>
+          <li className="flex justify-between gap-2"><span>Door-to-Door</span><span className="font-bold">R130</span></li>
+        </ul>
+      </div>
+
+      {/* TRACK - NOW JUST A LINK TO /track PAGE, NO SEARCH */}
+      <div>
+        <h3 className="font-black text-sm tracking-[0.15em]">📦 TRACK PARCEL</h3>
+        <p className="text-white/60 text-xs mt-1">Where is your parcel?</p>
+        <p className="text-sm mt-3 text-white/80 leading-relaxed">Ordered → At Rank →<br/>On Taxi → Delivered</p>
+        <a href="/track" className="inline-block mt-4 bg-white text-black px-5 py-3 rounded-full font-bold text-sm hover:scale-[1.03] transition">Track Parcel →</a>
+        <p className="text-white/50 text-xs mt-3">You will need your code.<br/>e.g. SOW-001</p>
+      </div>
+
+      <div>
+        <h3 className="font-black text-sm tracking-[0.15em]">📱 SOCIALS</h3>
+        <p className="text-white/60 text-xs mt-1">Follow the diary.</p>
+        <div className="flex flex-wrap gap-2 mt-3">
+          <a href="https://instagram.com" target="_blank" className="bg-white/10 hover:bg-white hover:text-black transition px-4 py-2.5 rounded-full text-sm font-bold">Instagram</a>
+          <a href="https://tiktok.com" target="_blank" className="bg-white/10 hover:bg-white hover:text-black transition px-4 py-2.5 rounded-full text-sm font-bold">TikTok</a>
+          <a href="https://wa.me/27600000000" target="_blank" className="bg-white/10 hover:bg-white hover:text-black transition px-4 py-2.5 rounded-full text-sm font-bold">WhatsApp</a>
+          <a href="https://x.com" target="_blank" className="bg-white/10 hover:bg-white hover:text-black transition px-4 py-2.5 rounded-full text-sm font-bold">X</a>
+        </div>
+        <h3 className="font-black text-sm tracking-[0.15em] mt-6">HELP</h3>
+        <div className="mt-2 space-y-1 text-sm text-white/70">
+          <a href="/about" className="block hover:text-white">About</a>
+          <a href="/brands" className="block hover:text-white">Brands</a>
+          <a href="/track" className="block hover:text-white">Track Parcel</a>
+          <button onClick={scrollToShop} className="block hover:text-white">Shop</button>
+          <button onClick={() => setShowSignup(true)} className="block hover:text-white">Sell With Us</button>
+        </div>
+      </div>
+    </div>
+
+    <div className="border-t border-white/15 pt-4 flex flex-col sm:flex-row justify-between gap-2 text-xs text-white/50">
+      <p>© 2026 THE DIARY — Johannesburg. Wear Your Story.</p>
+      <p>Pickup • Delivery via Taxi • No fuel, just batching.</p>
+    </div>
+  </div>
+</footer>
+
+      {/* SIGNUP BRAND MODAL */}
+      {showSignup && (
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setShowSignup(false)}>
+          <div className="bg-white text-black w-full max-w-[520px] rounded-t-[24px] sm:rounded-[24px] p-5 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-2xl font-black tracking-tighter">Signup Brand.</h3>
+                <p className="text-sm text-[#5A5A55] mt-1">We sell for you. You drop at rank. We handle buyers + taxis.</p>
+              </div>
+              <button onClick={() => setShowSignup(false)} className="w-[40px] h-[40px] rounded-full bg-black text-white shrink-0">✕</button>
+            </div>
+            <div className="mt-5 space-y-3">
+              <input placeholder="Brand name * e.g. Soweto Street Co." className="w-full border border-[#E5E2DB] rounded-[14px] px-4 py-3.5 outline-none focus:border-black" />
+              <input placeholder="Your name *" className="w-full border border-[#E5E2DB] rounded-[14px] px-4 py-3.5 outline-none focus:border-black" />
+              <input placeholder="WhatsApp number * e.g. 076 123 4567" className="w-full border border-[#E5E2DB] rounded-[14px] px-4 py-3.5 outline-none focus:border-black" />
+              <input placeholder="Instagram @handle" className="w-full border border-[#E5E2DB] rounded-[14px] px-4 py-3.5 outline-none focus:border-black" />
+              <select className="w-full border border-[#E5E2DB] rounded-[14px] px-4 py-3.5 bg-white">
+                <option>Your Kasi *</option>
+                <option>Soweto</option>
+                <option>Tembisa</option>
+                <option>Alex</option>
+                <option>Pheli</option>
+                <option>Sosha</option>
+                <option>Other</option>
+              </select>
+              <select className="w-full border border-[#E5E2DB] rounded-[14px] px-4 py-3.5 bg-white">
+                <option>What do you sell? *</option>
+                <option>T-Shirts</option>
+                <option>Hoodies</option>
+                <option>Two-piece sets</option>
+                <option>Caps / Accessories</option>
+                <option>Shoes</option>
+                <option>Other</option>
+              </select>
+              <textarea placeholder="Tell us about your brand in 2 lines..." rows={3} className="w-full border border-[#E5E2DB] rounded-[14px] px-4 py-3.5 outline-none focus:border-black resize-none" />
+              <div className="bg-[#F6F5F2] rounded-[14px] p-3 text-xs leading-relaxed">
+                <p className="font-bold">How it works:</p>
+                <p className="text-[#5A5A55] mt-1">1. You list • 2. Buyer orders • 3. You drop at rank Thu/Fri • 4. Taxi delivers • 5. You get paid. Commission 13% + R20 drop fee.</p>
+              </div>
+              <button onClick={() => { alert("Thanks! We will WhatsApp you within 24h."); setShowSignup(false); }} className="w-full bg-black text-white py-4 rounded-full font-bold min-h-[56px]">Submit Brand →</button>
+              <p className="text-center text-xs text-[#8A857C]">Or WhatsApp us directly: 076 000 0000</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MOBILE BOTTOM NAV */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E5E2DB] flex justify-around py-2 pb-[env(safe-area-inset-bottom)]">
         <a href="/" className="flex flex-col items-center px-4 py-1 min-w-[64px]"><span className="text-lg">🏠</span><span className="text-[11px] font-bold">Home</span></a>
         <button onClick={scrollToShop} className="flex flex-col items-center px-6 py-2 min-w-[64px] bg-black text-white rounded-full -mt-4 shadow-lg"><span className="text-lg">🛍️</span><span className="text-[11px] font-bold">Shop</span></button>
