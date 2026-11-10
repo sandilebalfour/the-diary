@@ -109,15 +109,7 @@ export default function Home() {
     setTimeout(() => document.getElementById("shop-results")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
   };
 
-  const handleTrack = () => {
-    const code = trackCode.trim().toUpperCase() || "SOW-001";
-    if (code.startsWith("SOW")) setTrackResult({ status: "On Taxi • Soweto → CBD", detail: "Your parcel left Maponya Rank at 10:15. Driver: Taxi #SOW-12. Collect at Bree Rank.", step: 2 });
-    else if (code.startsWith("TEM")) setTrackResult({ status: "At Rank • Tembisa", detail: "Your parcel is at Phumulani Mall Rank waiting for next taxi to CBD.", step: 1 });
-    else if (code.startsWith("ALEX")) setTrackResult({ status: "Delivered • Alex", detail: "Collected at Pan Africa at 14:20. Thanks for shopping The Diary.", step: 3 });
-    else if (code.startsWith("PHELI") || code.startsWith("PHE")) setTrackResult({ status: "On Taxi • Pheli → CBD", detail: "Left Marabastad Rank at 11:00. ETA Bree Rank 12:30.", step: 2 });
-    else if (code.startsWith("SOS")) setTrackResult({ status: "Ordered • Sosha", detail: "Seller confirmed. Drop at Sosha Crossing on Friday 10am.", step: 0 });
-    else setTrackResult({ status: "Ordered", detail: "We found your order. Seller is packing it. Drop at rank on Thu/Fri.", step: 0 });
-  };
+
 
   const filteredProducts = products.filter((p) => {
     if (selectedGender === "OnSale" && !p.onSale) return false;
