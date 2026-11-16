@@ -1,23 +1,56 @@
 "use client";
 
 import { useState } from "react";
+import { supabaseClient } from "@/lib/supabaseClient";
 
 export default function TrackPage() {
   const [code, setCode] = useState("");
   const [trackedCode, setTrackedCode] = useState("");
-  const [result, setResult] = useState<{ status: string; detail: string; step: number } | null>(null);
+  const [order, setOrder] = useState<any>(null);
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
-  const handleTrack = (raw?: string) => {
-    const c = (raw ?? code).trim().toUpperCase() || "SOW-001";
+  const STATUS_MAP: Record<string, { status: string; detail: string; step: number }> = {
+    ordered: { status: "Ordered", detail: "We found your order. Seller is packing it. Drop at rank on Thu/Fri.", step: 0 },
+    at_rank: { status: "At Rank", detail: "Your parcel is at the rank waiting for the next taxi.", step: 1 },
+    on_taxi: { status: "On Taxi", detail: "Your parcel left the rank. It's on the taxi to you.", step: 2 },
+    delivered: { status: "Delivered", detail: "Collected / Delivered. Thanks for shopping The Diary.", step: 3 },
+  };
+
+  const handleTrack = async (raw?: string) => {
+    const c = (raw ?? code).trim().toUpperCase();
+    if (!c) return;
     setCode(c);
     setTrackedCode(c);
-    if (c.startsWith("SOW")) setResult({ status: "On Taxi • Soweto → CBD", detail: "Your parcel left Maponya Rank at 10:15. Driver: Taxi #SOW-12. Collect at Bree Rank.", step: 2 });
-    else if (c.startsWith("TEM")) setResult({ status: "At Rank • Tembisa", detail: "Your parcel is at Phumulani Mall Rank waiting for next taxi to CBD.", step: 1 });
-    else if (c.startsWith("ALEX")) setResult({ status: "Delivered • Alex", detail: "Collected at Pan Africa at 14:20. Thanks for shopping The Diary.", step: 3 });
-    else if (c.startsWith("PHELI") || c.startsWith("PHE")) setResult({ status: "On Taxi • Pheli → CBD", detail: "Left Marabastad Rank at 11:00. ETA Bree Rank 12:30.", step: 2 });
-    else if (c.startsWith("SOS")) setResult({ status: "Ordered • Sosha", detail: "Seller confirmed. Drop at Sosha Crossing on Friday 10am.", step: 0 });
-    else setResult({ status: "Ordered", detail: "We found your order. Seller is packing it. Drop at rank on Thu/Fri.", step: 0 });
+    setLoading(true);
+    setNotFound(false);
+    setOrder(null);
+    setItems([]);
+
+    const { data } = await supabaseClient
+      .from("orders")
+      .select("*")
+      .eq("order_code", c)
+      .single();
+
+    if (!data) {
+      setNotFound(true);
+      setLoading(false);
+      return;
+    }
+
+    setOrder(data);
+
+    const { data: orderItems } = await supabaseClient
+      .from("order_items")
+      .select("*")
+      .eq("order_id", data.id);
+    setItems(orderItems || []);
+    setLoading(false);
   };
+
+  const result = order ? STATUS_MAP[order.status] || STATUS_MAP.ordered : null;
 
   return (
     <main className="min-h-screen bg-[#F6F5F2] text-[#1C1C1A] px-4 sm:px-6 lg:px-12 py-8">
@@ -25,7 +58,7 @@ export default function TrackPage() {
         <a href="/" className="text-sm font-bold underline">← Back to Home</a>
         <p className="text-[11px] tracking-[0.25em] text-[#8A857C] mt-6">THE DIARY • TRACK</p>
         <h1 className="text-5xl font-black tracking-tighter leading-[0.95] mt-2">Track<br/>Parcel.</h1>
-        <p className="text-[#5A5A55] mt-3">Type your code from WhatsApp. e.g. SOW-001, TEM-002, ALEX-003</p>
+        <p className="text-[#5A5A55] mt-3">Type your code from checkout. e.g. SOW-123</p>
 
         <div className="mt-6 bg-white border border-[#E5E2DB] rounded-[20px] p-4">
           <div className="flex gap-2">
@@ -33,16 +66,38 @@ export default function TrackPage() {
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               onKeyDown={(e) => { if (e.key === "Enter") handleTrack(); }}
-              placeholder="SOW-001"
-              className="flex-1 min-w-0 border border-[#E5E2DB] px-4 py-4 rounded-full font-bold outline-none focus:border-black"
+              placeholder="SOW-123"
+              className="flex-1 min-w-0 border border-[#E5E2DB] px-4 py-4 rounded-full font-bold outline-none focus:border-black uppercase"
             />
-            <button onClick={() => handleTrack()} className="bg-black text-white px-6 py-4 rounded-full font-bold shrink-0">Track</button>
+            <button onClick={() => handleTrack()} disabled={loading} className="bg-black text-white px-6 py-4 rounded-full font-bold shrink-0 disabled:opacity-50">
+              {loading ? "..." : "Track"}
+            </button>
           </div>
 
-          {result && (
+          {notFound && (
+            <div className="mt-4 bg-[#FFF1F1] rounded-[16px] p-4 text-center">
+              <p className="font-black">No order found for {trackedCode}</p>
+              <p className="text-sm text-[#5A5A55] mt-1">Check the code - it's on your order success screen. It looks like SOW-123, not SOW-001.</p>
+            </div>
+          )}
+
+          {result && order && (
             <div className="mt-4 bg-[#F6F5F2] rounded-[16px] p-4">
               <p className="font-black">{trackedCode} • {result.status}</p>
               <p className="text-sm text-[#5A5A55] mt-1">{result.detail}</p>
+              <p className="text-xs text-[#8A857C] mt-2">{order.kasi} • {order.delivery_type} • R{order.total_cents / 100} • {order.customer_name}</p>
+              
+              {items.length > 0 && (
+                <div className="mt-3 border-t border-[#E5E2DB] pt-3">
+                  {items.map((it) => (
+                    <div key={it.id} className="flex justify-between text-sm">
+                      <span>{it.product_name} x{it.quantity}</span>
+                      <span className="font-bold">R{it.price_cents / 100}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <div className="flex gap-1 mt-4">
                 {["Ordered", "At Rank", "On Taxi", "Delivered"].map((s, i) => (
                   <div key={s} className={`flex-1 h-[8px] rounded-full ${i <= result.step ? "bg-black" : "bg-[#E5E2DB]"}`}></div>
@@ -55,12 +110,8 @@ export default function TrackPage() {
           )}
 
           <div className="mt-4 text-sm text-[#8A857C]">
-            <p>Try these test codes:</p>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {["SOW-001", "TEM-002", "ALEX-003", "PHELI-004", "SOSHA-005"].map((c) => (
-                <button key={c} onClick={() => handleTrack(c)} className="bg-[#F6F5F2] border border-[#E5E2DB] px-3 py-2 rounded-full font-bold text-xs hover:bg-black hover:text-white transition">{c}</button>
-              ))}
-            </div>
+            <p>Your real code is the one you got after checkout - not the test ones below.</p>
+            <p className="text-xs mt-1">If you checked out before, check Supabase &gt; orders table for your code.</p>
           </div>
         </div>
 
